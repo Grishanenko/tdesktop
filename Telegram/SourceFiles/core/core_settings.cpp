@@ -120,7 +120,7 @@ void LogPosition(const WindowPosition &position, const QString &name) {
 }
 
 Settings::Settings()
-: _sendSubmitWay(Ui::InputSubmitSettings::Enter)
+: _sendSubmitWay(Ui::InputSubmitSettings::CtrlEnter)
 , _floatPlayerColumn(Window::Column::Second)
 , _floatPlayerCorner(RectPart::TopRight)
 , _dialogsWidthRatio(DefaultDialogsWidthRatio()) {
@@ -1220,7 +1220,7 @@ void Settings::resetOnLastLogout() {
 
 	_lastSeenWarningSeen = false;
 	_sendFilesWay = Ui::SendFilesWay();
-	//_sendSubmitWay = Ui::InputSubmitSettings::Enter;
+	_sendSubmitWay = Ui::InputSubmitSettings::CtrlEnter;
 	_soundOverrides = {};
 
 	_exeLaunchWarning = true;

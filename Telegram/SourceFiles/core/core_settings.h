@@ -917,7 +917,7 @@ private:
 	bool _disableOpenGL = false;
 	rpl::variable<WorkMode> _workMode = WorkMode::WindowAndTray;
 	base::flags<Calls::Group::StickedTooltip> _hiddenGroupCallTooltips;
-	rpl::variable<bool> _closeToTaskbar = false;
+	rpl::variable<bool> _closeToTaskbar = true;
 	rpl::variable<QString> _customDeviceModel;
 	rpl::variable<Media::RepeatMode> _playerRepeatMode;
 	rpl::variable<Media::OrderMode> _playerOrderMode;

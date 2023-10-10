@@ -73,6 +73,7 @@ private:
 	void initResetScaleButton();
 	void toggleAccounts();
 	void chooseEmojiStatus();
+	void toggleSoundNotifications();
 
 	void drawName(Painter &p);
 

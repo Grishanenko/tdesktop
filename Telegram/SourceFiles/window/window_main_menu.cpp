@@ -969,6 +969,28 @@ void MainMenu::setupMenu() {
 			_nightThemeSwitches.fire_copy(*darkMode);
 		}
 	}, _nightThemeToggle->lifetime());
+
+	const auto Notifications = addAction(
+//		tr::lng_settings_section_notify(),		// lang.strings: "Notifications", result: "Notifications and Sounds"
+		tr::lng_profile_enable_notifications(),	// lang.strings: "Notifications", result: "Notifications" 
+		{ &st::menuIconNotifications }
+	)->toggleOn(rpl::single(Core::App().settings().desktopNotify()));
+
+	Notifications->toggledValue(
+	) | rpl::filter([](bool checked) {
+		return (checked != Core::App().settings().desktopNotify());
+	}) | rpl::start_with_next([=](bool checked) {
+		MainMenu::toggleSoundNotifications();
+//		Core::App().settings().setDesktopNotify(checked);
+//		Core::App().saveSettingsDelayed();
+	}, Notifications->lifetime());
+
+	addAction(
+		tr::lng_quit_from_tray(),
+		{ &st::menuIconLeaveAttention }
+	)->setClickedCallback([=] {
+		Core::Quit();
+	});
 }
 
 void MainMenu::resizeEvent(QResizeEvent *e) {
@@ -1121,6 +1143,52 @@ rpl::producer<OthersUnreadState> OtherAccountsUnreadState() {
 	return rpl::single(rpl::empty) | rpl::then(
 		Core::App().unreadBadgeChanges()
 	) | rpl::map(OtherAccountsUnreadStateCurrent);
+}
+
+void MainMenu::toggleSoundNotifications() {
+	auto soundNotifyChanged = false;
+	auto flashBounceNotifyChanged = false;
+	auto &settings = Core::App().settings();
+	settings.setDesktopNotify(!settings.desktopNotify());
+	if (settings.desktopNotify()) {
+		if (settings.rememberedSoundNotifyFromTray()
+			&& !settings.soundNotify()) {
+			settings.setSoundNotify(true);
+			settings.setRememberedSoundNotifyFromTray(false);
+			soundNotifyChanged = true;
+		}
+		if (settings.rememberedFlashBounceNotifyFromTray()
+			&& !settings.flashBounceNotify()) {
+			settings.setFlashBounceNotify(true);
+			settings.setRememberedFlashBounceNotifyFromTray(false);
+			flashBounceNotifyChanged = true;
+		}
+	} else {
+		if (settings.soundNotify()) {
+			settings.setSoundNotify(false);
+			settings.setRememberedSoundNotifyFromTray(true);
+			soundNotifyChanged = true;
+		} else {
+			settings.setRememberedSoundNotifyFromTray(false);
+		}
+		if (settings.flashBounceNotify()) {
+			settings.setFlashBounceNotify(false);
+			settings.setRememberedFlashBounceNotifyFromTray(true);
+			flashBounceNotifyChanged = true;
+		} else {
+			settings.setRememberedFlashBounceNotifyFromTray(false);
+		}
+	}
+	Core::App().saveSettingsDelayed();
+	using Change = Window::Notifications::ChangeType;
+	auto &notifications = Core::App().notifications();
+	notifications.notifySettingsChanged(Change::DesktopEnabled);
+	if (soundNotifyChanged) {
+		notifications.notifySettingsChanged(Change::SoundEnabled);
+	}
+	if (flashBounceNotifyChanged) {
+		notifications.notifySettingsChanged(Change::FlashBounceEnabled);
+	}
 }
 
 } // namespace Window
